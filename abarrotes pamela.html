@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Abarrotes Pamela</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #ff9a00, #ff577f);
+      color: #333;
+    }
+    header {
+      background: #fff;
+      color: #ff577f;
+      padding: 1em;
+      text-align: center;
+      font-size: 1.5em;
+      font-weight: bold;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .container {
+      padding: 2em;
+      display: grid;
+      grid-template-columns: 3fr 1fr;
+      gap: 2em;
+    }
+    .product {
+      background: white;
+      padding: 1em;
+      margin-bottom: 1em;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .product img {
+      width: 100%;
+      max-height: 200px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+    .product h3 {
+      margin: 0.5em 0;
+      color: #ff577f;
+    }
+    .product button {
+      margin-top: 0.5em;
+      padding: 0.5em 1em;
+      background-color: #ff577f;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .product button:hover {
+      background-color: #e0446b;
+    }
+    #cart {
+      background: white;
+      padding: 1em;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    #cart h2 {
+      margin-top: 0;
+      color: #ff577f;
+    }
+    #cart-items li {
+      margin-bottom: 0.5em;
+    }
+    .payment {
+      margin-top: 1em;
+    }
+    .payment select, .payment input, .payment button {
+      margin-top: 0.5em;
+      padding: 0.5em;
+      width: 100%;
+      border-radius: 5px;
+    }
+    .payment button {
+      background-color: #ff9a00;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .payment button:hover {
+      background-color: #e18700;
+    }
+  </style>
+</head>
+<body>
+
+<header>Abarrotes Pamela</header>
+
+<div class="container">
+  <div id="product-list">
+    <div class="product" data-id="1" data-name="sabritas" data-price="20">
+      <img src="https://via.placeholder.com/300x200?text=Sabritas" alt="sabritas">
+      <h3>sabritas</h3>
+      <p>Precio: $20</p>
+      <button onclick="addToCart(1)">Agregar al carrito</button>
+    </div>
+    <div class="product" data-id="2" data-name="leches" data-price="50">
+      <img src="https://via.placeholder.com/300x200?text=Leche" alt="leches">
+      <h3>leches</h3>
+      <p>Precio: $50</p>
+      <button onclick="addToCart(2)">Agregar al carrito</button>
+    </div>
+    <div class="product" data-id="3" data-name="refrescos" data-price="30">
+      <img src="https://via.placeholder.com/300x200?text=Refrescos" alt="refrescos">
+      <h3>refrescos</h3>
+      <p>Precio: $30</p>
+      <button onclick="addToCart(3)">Agregar al carrito</button>
+    </div>
+    <div class="product" data-id="4" data-name="jugos" data-price="28">
+      <img src="https://via.placeholder.com/300x200?text=Jugos" alt="jugos">
+      <h3>jugos</h3>
+      <p>Precio: $28</p>
+      <button onclick="addToCart(4)">Agregar al carrito</button>
+    </div>
+    <div class="product" data-id="5" data-name="papel higienico" data-price="39">
+      <img src="https://via.placeholder.com/300x200?text=Papel" alt="papel">
+      <h3>papel higiénico</h3>
+      <p>Precio: $39</p>
+      <button onclick="addToCart(5)">Agregar al carrito</button>
+    </div>
+  </div>
+
+  <div id="cart">
+    <h2>Carrito</h2>
+    <ul id="cart-items"></ul>
+    <p><strong>Total: $<span id="total">0</span></strong></p>
+
+    <div class="payment">
+      <h3>Método de pago:</h3>
+      <select id="payment-method" onchange="togglePaymentFields()">
+        <option value="card">Tarjeta de crédito</option>
+        <option value="paypal">PayPal</option>
+        <option value="transfer">Transferencia bancaria</option>
+      </select>
+
+      <div id="card-fields">
+        <input type="text" id="card-number" placeholder="Número de tarjeta">
+        <input type="text" id="card-expiry" placeholder="MM/AA">
+        <input type="text" id="card-cvv" placeholder="CVV">
+      </div>
+
+      <div id="paypal-fields" style="display: none;">
+        <input type="email" id="paypal-email" placeholder="Correo electrónico PayPal">
+      </div>
+
+      <div id="transfer-fields" style="display: none;">
+        <input type="text" id="transfer-ref" placeholder="Número de referencia">
+      </div>
+
+      <button onclick="checkout()">Pagar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const products = {
+    1: { name: "sabritas", price: 20 },
+    2: { name: "leches", price: 50 },
+    3: { name: "refrescos", price: 30 },
+    4: { name: "jugos", price: 28 },
+    5: { name: "papel higienico", price: 39 },
+  };
+
+  const cart = {};
+
+  function addToCart(id) {
+    if (!cart[id]) cart[id] = 0;
+    cart[id]++;
+    renderCart();
+  }
+
+  function removeFromCart(id) {
+    if (cart[id]) {
+      cart[id]--;
+      if (cart[id] <= 0) delete cart[id];
+      renderCart();
+    }
+  }
+
+  function renderCart() {
+    const cartItems = document.getElementById("cart-items");
+    cartItems.innerHTML = "";
+    let total = 0;
+    for (const id in cart) {
+      const item = products[id];
+      const quantity = cart[id];
+      total += item.price * quantity;
+      const li = document.createElement("li");
+      li.innerHTML = `${item.name} x ${quantity} = $${item.price * quantity}
+        <button onclick="removeFromCart(${id})">Quitar</button>`;
+      cartItems.appendChild(li);
+    }
+    document.getElementById("total").textContent = total;
+  }
+
+  function togglePaymentFields() {
+    const method = document.getElementById("payment-method").value;
+    document.getElementById("card-fields").style.display = method === "card" ? "block" : "none";
+    document.getElementById("paypal-fields").style.display = method === "paypal" ? "block" : "none";
+    document.getElementById("transfer-fields").style.display = method === "transfer" ? "block" : "none";
+  }
+
+  function checkout() {
+    const method = document.getElementById("payment-method").value;
+    if (Object.keys(cart).length === 0) {
+      alert("Tu carrito está vacío.");
+      return;
+    }
+
+    let paymentInfo = "";
+    if (method === "card") {
+      const number = document.getElementById("card-number").value;
+      const expiry = document.getElementById("card-expiry").value;
+      const cvv = document.getElementById("card-cvv").value;
+      if (!number || !expiry || !cvv) {
+        alert("Completa los campos de tarjeta.");
+        return;
+      }
+      paymentInfo = `Tarjeta: ${number}, Expira: ${expiry}`;
+    } else if (method === "paypal") {
+      const email = document.getElementById("paypal-email").value;
+      if (!email) {
+        alert("Ingresa tu correo PayPal.");
+        return;
+      }
+      paymentInfo = `Correo PayPal: ${email}`;
+    } else if (method === "transfer") {
+      const ref = document.getElementById("transfer-ref").value;
+      if (!ref) {
+        alert("Ingresa número de referencia.");
+        return;
+      }
+      paymentInfo = `Transferencia ref: ${ref}`;
+    }
+
+    alert(`Procesando pago con ${method.toUpperCase()}...
+${paymentInfo}
+(Esto es solo una simulación)`);
+  }
+
+  window.onload = togglePaymentFields;
+</script>
+
+</body>
+</html>
